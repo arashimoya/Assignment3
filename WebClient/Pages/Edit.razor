@@ -1,0 +1,84 @@
+﻿@page "/Edit/{Id:int}"
+@using Models
+@using Assignment1.Data
+@inject IPersonService CloudPersonService
+@inject NavigationManager NavigationManager
+<h3>Edit Adult(@Id)</h3>
+
+@if (adultToEdit == null)
+{
+    <em>Adult not found!</em>
+}
+else
+{
+    <EditForm Model="@adultToEdit" OnValidSubmit="@Save">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+        <div class="form-group">
+            First Name:<br/>
+            <InputText @bind-Value="adultToEdit.FirstName"/>
+        </div><div class="form-group">
+                             Last Name:<br/>
+                             <InputText @bind-Value="adultToEdit.LastName"/>
+                         </div>
+                         <div class="form-group">
+                             Hair Color:<br/>
+                             <InputText @bind-Value="adultToEdit.HairColor"/>
+                         </div>
+                         <div class="form-group">
+                             Eye Color:<br/>
+                             <InputText @bind-Value="adultToEdit.EyeColor"/>
+                         </div>
+                      <div class="form-group">
+                          Age:<br/>
+                          <InputNumber @bind-Value="adultToEdit.Age"/>
+                      </div>
+                      <div class="form-group">
+                          Weight:<br/>
+                          <InputNumber @bind-Value="adultToEdit.Weight"/>
+                      </div>
+                      <div class="form-group">
+                          Height:<br/>
+                          <InputNumber @bind-Value="adultToEdit.Height"/>
+                      </div>
+        <div class="form-group">
+            Sex:<br/>
+            <InputText @bind-Value="adultToEdit.Sex"/>
+        </div>
+        <div class="form-group">
+                Job Title:<br/>
+                <InputText @bind-Value="adultToEdit.JobTitle.JobTitle"/>
+            </div>
+            <div class="form-group">
+                Salary:<br/>
+                <InputNumber @bind-Value="adultToEdit.JobTitle.Salary"/>
+            </div>
+        <p class="actions">
+            <button class="btn btn-outline-dark" type="submit">Save</button>
+            <button class="btn btn-outline-dark" @onlcick="GoBack"> Cancel</button>
+        </p>
+        
+    </EditForm>
+}
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Adult adultToEdit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        adultToEdit = await CloudPersonService.GetAsync(Id);
+    }
+
+    private async Task Save()
+    {
+        await CloudPersonService.UpdatePersonAsync(adultToEdit);
+        NavigationManager.NavigateTo("/Adults");
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/Adults");
+    }
+}

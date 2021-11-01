@@ -1,0 +1,252 @@
+﻿@page "/Adults"
+@using Models
+@using FileData
+@using Assignment1.Data
+@using System.Threading
+@inject NavigationManager NavigationManager
+@inject IPersonService CloudPersonService
+<h3>Adults</h3>
+<button @onclick=@toggleSearch>Filter</button>
+<div hidden="@(!HideLabel)">
+    <table class="table">
+        <tbody>
+        <tr>
+            
+            <td>Filter by:</td>
+            <td><input placeholder="name..." type="text" @oninput="((arg) => FilterByName(arg))" style="width: 200px"/></td>
+            <td><input placeholder="hair color..." type="text" @oninput="((arg) => FilterByHairColor(arg))" style="width:150px"/></td>
+            <td><input placeholder="eye color..." type="text" @oninput="((arg) => FilterByEyeColor(arg))" style="width:150px"/></td>
+            <td><input placeholder="older than..." type="number" @oninput="((arg) => FilterByOlderThan(arg))" style="width:100px"/></td>
+            <td><input placeholder="younger than..." type="number" @oninput="((arg) => FilterByYoungerThan(arg))" style="width:100px"/></td>
+            <td><input placeholder="heavier than..." type="number" @oninput="((arg) => FilterByHeavierThan(arg))" style="width:100px"/></td>
+            <td><input placeholder="lighter than..." type="number" @oninput="((arg) => FilterByLighterThan(arg))" style="width:100px"/></td>
+            <td>sex:
+            <select class="form-control selectpicker" @onchange="@((arg) => FilterBySex(arg))" style="width:100px">
+                <option>Both</option>
+                <option>Female</option>
+                <option>Male</option>
+            </select>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+@if (adultsToShow == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+} else if (!adultsToShow.Any()){
+    <p>
+        <em>No Adults items exist. Please add some</em>
+    </p>
+}   else{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Hair Color</th>
+            <th>Eye Color</th>
+            <th>Age</th>
+            <th>Weight</th>
+            <th>Height</th>
+            <th>Sex</th>
+            <th>Works as:</th>
+            <th>Salary</th>
+            <AuthorizeView>
+            <th>Remove</th>
+            <th>Edit</th>
+            </AuthorizeView>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in adultsToShow)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.FirstName</td>
+                <td>@item.LastName</td>
+                <td>@item.HairColor</td>
+                <td>@item.EyeColor</td>
+                <td>@item.Age</td>
+                <td>@item.Weight</td>
+                <td>@item.Height</td>
+                <td>@item.Sex</td>
+                <td>@item.JobTitle.JobTitle</td>
+            <td>@item.JobTitle.Salary</td>
+                <AuthorizeView>
+                <td>
+                    <button @onclick="@(() => RemoveAdult(item.Id))">
+                        <i class="oi oi-trash" style="color:red"/>
+                    </button>
+                </td>
+                <td>
+                    <button @onclick="@(() => Edit(item.Id))">
+                        <i class="oi oi-pencil" style="color:blue"/>
+                    </button>
+                </td>
+                </AuthorizeView>
+            </tr>
+        }
+        </tbody>
+    </table>
+    
+}
+
+@code {
+    private IList<Adult> adultsAll;
+    private IList<Adult> adultsToShow;
+
+    private string? filterByName;
+    private string? filterByHair;
+    private string? filterByEye;
+    private int? filterByOlderThan;
+    private int? filterByYoungerThan;
+    private int? filterByHeavierThan;
+    private int? filterByLighterThan;
+    private string? filterBySex;
+
+    private bool HideLabel   {get;set;} = false;
+    private void toggleSearch()
+    {
+        HideLabel = !HideLabel;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        adultsAll = new List<Adult>();
+        adultsAll = await CloudPersonService.GetAllAsync();
+        adultsToShow = new List<Adult>();
+        adultsToShow = adultsAll;
+    }
+
+    private void FilterByName(ChangeEventArgs args)
+    {
+        filterByName = null;
+        try
+        {
+            filterByName = args.Value.ToString();
+        }
+        
+        catch (Exception e){ }
+        ExecuteFilter();
+    }
+
+    private void FilterByHairColor(ChangeEventArgs args)
+    {
+        filterByHair = null;
+        try
+        {
+            filterByHair = args.Value.ToString();
+        }catch (Exception e){}
+        ExecuteFilter();
+    }
+
+    private void FilterByEyeColor(ChangeEventArgs args)
+    {
+        filterByEye = null;
+        try
+        {
+            filterByEye = args.Value.ToString();
+        }catch (Exception e){}
+        ExecuteFilter();
+    }
+    private void FilterByOlderThan(ChangeEventArgs args)
+    {
+        filterByOlderThan = null;
+        try
+        {
+            filterByOlderThan = int.Parse(args.Value.ToString());
+        }catch (Exception e){}
+        ExecuteFilter();
+    }
+    
+    private void FilterByYoungerThan(ChangeEventArgs args)
+    {
+        filterByYoungerThan = null;
+        try
+        {
+            filterByYoungerThan = int.Parse(args.Value.ToString());
+        }catch (Exception e){}
+        ExecuteFilter();
+    }
+    private void FilterByHeavierThan(ChangeEventArgs args)
+    {
+        filterByHeavierThan = null;
+        try
+        {
+            filterByHeavierThan = int.Parse(args.Value.ToString());
+        }catch (Exception e){}
+        ExecuteFilter();
+    }
+    private void FilterByLighterThan(ChangeEventArgs args)
+    {
+        filterByLighterThan = null;
+        try
+        {
+            filterByLighterThan = int.Parse(args.Value.ToString());
+        }catch (Exception e){}
+        ExecuteFilter();
+    }
+    private void FilterBySex(ChangeEventArgs args)
+    {
+        filterBySex = null;
+        try
+        {
+            filterBySex = args.Value.ToString();
+        }catch (Exception e){}
+        if (filterBySex.Equals("Both"))
+            filterBySex = "";
+        else if (filterBySex.Equals("Male")) filterBySex = "M";
+        else if (filterBySex.Equals("Female"))
+        filterBySex = "F";
+        ExecuteFilter();
+    }
+
+    private void ExecuteFilter()
+    {
+        adultsToShow = adultsAll.Where(a=>
+            
+            (filterByName !=null && String.Format(a.FirstName+" "+a.LastName).Contains(filterByName, StringComparison.OrdinalIgnoreCase) || filterByName == null ) 
+             
+            
+            && (filterByHair!= null && a.HairColor.Contains(filterByHair, StringComparison.OrdinalIgnoreCase) || filterByHair ==null)
+            
+            && (filterByEye!= null && a.EyeColor.Contains(filterByEye, StringComparison.OrdinalIgnoreCase) || filterByEye == null)
+            
+            && (filterByOlderThan !=null && a.Age >= filterByOlderThan || filterByOlderThan == null)
+            
+            && (filterByYoungerThan !=null && a.Age <= filterByYoungerThan || filterByYoungerThan == null)
+            
+            && (filterByHeavierThan !=null && a.Weight >= filterByHeavierThan || filterByHeavierThan == null)
+            
+            && (filterByLighterThan !=null && a.Age <= filterByLighterThan || filterByLighterThan == null)
+            
+            && (filterBySex!= null && a.Sex.Contains(filterBySex, StringComparison.OrdinalIgnoreCase) || filterBySex == null)
+            
+            ).ToList();
+    }
+
+    private async Task RemoveAdult(int AdultId)
+    {
+        Adult toRemove = adultsAll.First(a => a.Id == AdultId);
+        try
+        {
+            await CloudPersonService.RemovePersonAsync(AdultId);
+            adultsAll.Remove(toRemove);
+            adultsToShow.Remove(toRemove);
+        }
+        catch (Exception e)
+        {
+            //
+        }
+    }
+    
+
+    private void Edit(int id)
+    {
+        NavigationManager.NavigateTo($"Edit/{id}");
+    }
+}

@@ -1,0 +1,54 @@
+﻿@page "/register"
+@namespace RegisterComponent
+@using Assignment1.Data
+@using Assignment1.Authentication
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject IUserService UserService
+
+<AuthorizeView>
+    <NotAuthorized>
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" placeholder="username" @bind-value="username">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" placeholder="password" @bind-value="password"/>
+        </div>
+        <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" placeholder="password" @bind-value="confirmPassword"/>
+        </div>
+        <div style="color:red">@errorMessage</div>
+        <a href="/register" @onclick="PerformRegister">
+            Register
+        </a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private string username;
+    private string password;
+    private string confirmPassword;
+    private string errorMessage;
+
+    public async Task PerformRegister()
+    {
+        errorMessage = "";
+        try
+        {
+            ((CustomAuthenticationStateProvider) AuthenticationStateProvider).ValidateRegister(username, password, confirmPassword);
+            username = "";
+            password = "";
+            confirmPassword = "";
+            NavigationManager.NavigateTo("/register");
+        }
+        catch (Exception e)
+        {
+            errorMessage = e.Message;
+        }
+
+    }
+}
