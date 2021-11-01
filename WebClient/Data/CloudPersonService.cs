@@ -14,7 +14,12 @@ namespace Assignment1.Data
 
         public CloudPersonService()
         {
-            client = new HttpClient();
+            HttpClientHandler clientHandler = new HttpClientHandler();
+            clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => {
+                return true;
+            };
+
+            client = new HttpClient(clientHandler);
         }
         public Task AddPersonAsync(Adult adult)
         {
@@ -38,13 +43,14 @@ namespace Assignment1.Data
 
         public async Task<IList<Adult>> GetAllAsync()
         {
-            HttpResponseMessage response = await client.GetAsync(uri + "/adults");
+            HttpResponseMessage response = await client.GetAsync("https://localhost:5003/controller");
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception("Error");
             }
 
             string message = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(message);
             List<Adult> result = JsonSerializer.Deserialize<List<Adult>>(message);
 
             return result;

@@ -44,7 +44,24 @@ namespace WebAPI.Data
                     {
                         JobTitle = "Junior Developer",
                         Salary = 20000
-                    }
+                    },
+                },
+                new Adult
+                {
+                    Id = 2,
+                    FirstName = "Tomek",
+                    LastName = "Maj",
+                    Age = 21,
+                    EyeColor = "Bronze",
+                    HairColor = "Black",
+                    Height = 175,
+                    Sex = "M",
+                    Weight = 70,
+                    JobTitle = new Job()
+                    {
+                        JobTitle = "IT support",
+                        Salary = 20000,
+                    },
                 },
 
             };

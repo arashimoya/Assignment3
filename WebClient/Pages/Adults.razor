@@ -1,8 +1,6 @@
 ﻿@page "/Adults"
 @using Models
-@using FileData
 @using Assignment1.Data
-@using System.Threading
 @inject NavigationManager NavigationManager
 @inject IPersonService CloudPersonService
 <h3>Adults</h3>
@@ -63,7 +61,7 @@
         </tr>
         </thead>
         <tbody>
-        @foreach (var item in adultsToShow)
+        @foreach (var item in adultsAll)
         {
             <tr>
                 <td>@item.Id</td>
@@ -116,10 +114,16 @@
     }
     protected override async Task OnInitializedAsync()
     {
-        adultsAll = new List<Adult>();
-        adultsAll = await CloudPersonService.GetAllAsync();
-        adultsToShow = new List<Adult>();
-        adultsToShow = adultsAll;
+        try
+        {
+            adultsAll = await CloudPersonService.GetAllAsync();
+            adultsToShow = adultsAll;
+            Console.Write("#2" + adultsAll.ToString());
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Trouble getting adults");
+        }
     }
 
     private void FilterByName(ChangeEventArgs args)
