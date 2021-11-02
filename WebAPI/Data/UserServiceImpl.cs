@@ -1,58 +1,79 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using FileData;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Models;
 
 namespace WebAPI.Data
 {
     public class UserServiceImpl : IUserService
     {
-        private FileContext FileContext;
-        private List<User> users;
+        private IList<User> users;
+        private string usersFile = "users.json";
 
         public UserServiceImpl()
         {
-            FileContext = new FileContext();
-        }
-        
-        public User ValidateUser(string Username, string Password)
-        {
-            User first = FileContext.Users.FirstOrDefault(user => user.Username.Equals(Username));
-            if (first == null)
+            if (!File.Exists(usersFile))
             {
-                throw new Exception("User not found");
+                Seed();
+                WriteUsersToFile();
             }
 
-            if (!first.Password.Equals(Password))
-            {
-                throw new Exception("Incorrect password");
-            }
-
-            return first;
-        }
-        
-        //adding new user
-        public void RegisterUser(string username, string password)
-        {
-            User newUser = new User();
-            newUser.Username = username;
-            newUser.Password = password;
-            FileContext.Users.Add(newUser);
-            FileContext.SaveChanges();
+            string content = File.ReadAllText(usersFile);
+            users = JsonSerializer.Deserialize<IList<User>>(content);
         }
 
-        public bool DoesUsernameAlreadyExist(string username)
+
+        public async Task<User> ValidateUser(string username, string password)
         {
-            User newUser = new User();
-            newUser.Username = username;
-            bool tmp = false;
-            foreach (var user in FileContext.Users)
+            User user = users.FirstOrDefault(u => u.Username.Equals(username) && u.Password.Equals(password));
+            if (user != null)
             {
-                if (newUser.Username.Equals(user.Username)) tmp = true;
+                return user;
             }
 
+            throw new Exception("User not found!");
+        }
+
+        public Task RegisterUser(string username, string password)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> DoesUsernameAlreadyExist(string username)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<IList<User>> GetAllAsync()
+        {
+            List<User> tmp = new List<User>(users);
             return tmp;
+        }
+        private void Seed()
+        {
+            User[] userArray =
+            {
+                new User
+                {
+                    Username = "admin",
+                    Password = "monkey123"
+                },
+            };
+            users = userArray.ToList();
+
+        }
+
+        private void WriteUsersToFile()
+        {
+            string productsAsJson = JsonSerializer.Serialize(users, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+
+            File.WriteAllText(usersFile, productsAsJson);
         }
     }
 }

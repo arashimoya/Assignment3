@@ -13,6 +13,7 @@ using Assignment1.Data;
 using FileData;
 using Assignment1.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
+using WebAPI.Data;
 
 namespace Assignment1
 {
@@ -33,8 +34,9 @@ namespace Assignment1
             services.AddServerSideBlazor();
             services.AddSingleton<FileContext>();
             services.AddSingleton<IPersonService, CloudPersonService>();
-            services.AddScoped<IUserService, UserServiceImpl>();
+            services.AddScoped<IUserService, UserWebService>();
             services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+            
             //services.AddSingleton<IFamilyService, FamilyServiceImpl>();
 
         }

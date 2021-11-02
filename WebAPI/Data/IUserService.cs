@@ -1,11 +1,14 @@
-﻿using Models;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Models;
 
 namespace WebAPI.Data
 {
     public interface IUserService
     {
-        User ValidateUser(string Username, string Password);
-        void RegisterUser(string username, string password);
-        public bool DoesUsernameAlreadyExist(string username);
+        Task<User> ValidateUser(string username, string password);
+        Task RegisterUser(string username, string password);
+        Task<bool> DoesUsernameAlreadyExist(string username);
+        Task<IList<User>> GetAllAsync();
     }
 }

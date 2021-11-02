@@ -118,7 +118,10 @@
         {
             adultsAll = await CloudPersonService.GetAllAsync();
             adultsToShow = adultsAll;
-            Console.Write("#2" + adultsAll.ToString());
+            foreach (var item in adultsAll)
+            {
+                Console.WriteLine(item.FirstName);
+            }
         }
         catch (Exception e)
         {
