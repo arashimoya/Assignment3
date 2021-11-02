@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -84,18 +85,27 @@ namespace WebAPI.Data
             List<Adult> tmp = new List<Adult>(adults);
             return tmp;
         }
-        
-        public void AddPerson(Adult adult)
+
+        public async Task<Adult> AddAdultAsync(Adult adult)
         {
-            int max = FileContext.Adults.Max(adult => adult.Id);
+            int max = adults.Max(adult => adult.Id);
             adult.Id = (++max);
-            FileContext.Adults.Add(adult);
-            FileContext.SaveChanges();
+            adults.Add(adult);
+            WriteAdultsToFile();
+            return adult;
         }
 
-        public void EditPerson(Adult adult)
+        public async Task RemoveAdultAsync(int adultId)
         {
-            Adult toUpdate = FileContext.Adults.First(a => a.Id == adult.Id);
+            Adult toRemove = adults.FirstOrDefault(a => a.Id == adultId);
+            adults.Remove(toRemove);
+            WriteAdultsToFile();
+        }
+
+        public async Task<Adult> UpdateAsync(Adult adult)
+        {
+            Adult toUpdate = adults.FirstOrDefault(a => a.Id == adult.Id);
+            if (toUpdate == null) throw new Exception($"Did not find an adult with this ID");
             toUpdate.FirstName = adult.FirstName;
             toUpdate.LastName = adult.LastName;
             toUpdate.HairColor = adult.HairColor;
@@ -104,21 +114,10 @@ namespace WebAPI.Data
             toUpdate.Weight = adult.Weight;
             toUpdate.Height = adult.Height;
             toUpdate.Sex = adult.Sex;
-            FileContext.SaveChanges();
-        }
-
-        public void RemovePerson(int AdultId)
-        {
-            Adult toRemove = FileContext.Adults.First(a => a.Id == AdultId);
-            FileContext.Adults.Remove(toRemove);
-            FileContext.SaveChanges();
-        }
-
-        
-
-        public Adult Get(int id)
-        {
-            return FileContext.Adults.FirstOrDefault(a => a.Id == id);
+            toUpdate.JobTitle.Salary = adult.JobTitle.Salary;
+            toUpdate.JobTitle.JobTitle = adult.JobTitle.JobTitle;
+            WriteAdultsToFile();
+            return toUpdate;
         }
     }
 }

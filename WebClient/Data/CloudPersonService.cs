@@ -43,7 +43,7 @@ namespace Assignment1.Data
 
         public async Task<IList<Adult>> GetAllAsync()
         {
-            HttpResponseMessage response = await client.GetAsync("https://localhost:5003/controller");
+            HttpResponseMessage response = await client.GetAsync("https://localhost:5003/adults");
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception("Error");
