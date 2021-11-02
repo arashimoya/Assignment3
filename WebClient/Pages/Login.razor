@@ -41,6 +41,7 @@
             password = "";
         } catch (Exception e) {
             errorMessage = e.Message;
+            Console.WriteLine(e.StackTrace + " " + e.Message);
         }
     }
 

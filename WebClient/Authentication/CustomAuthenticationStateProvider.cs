@@ -61,7 +61,9 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider {
         } 
         catch (Exception e) 
         {
+            Console.WriteLine(e.StackTrace);
             throw e;
+            
         }
 
         NotifyAuthenticationStateChanged(
@@ -88,9 +90,6 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider {
 
     private ClaimsIdentity SetupClaimsForUser(User user) {
         List<Claim> claims = new List<Claim>();
-        claims.Add(new Claim(ClaimTypes.Name, user.Username));
-        
-
         ClaimsIdentity identity = new ClaimsIdentity(claims, "apiauth_type");
         return identity;
     }
