@@ -13,6 +13,7 @@ using WebAPI.Data;
 
 namespace Assignment1.Authentication {
 public class CustomAuthenticationStateProvider : AuthenticationStateProvider {
+    
     private readonly IJSRuntime jsRuntime;
     private  IUserService userService;
 

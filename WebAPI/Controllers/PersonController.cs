@@ -78,6 +78,7 @@ namespace WebAPI.Controllers
         {
             try
             {
+                Console.WriteLine("asking to remove adult with id" + id);
                 await personService.RemoveAdultAsync(id);
                 return Ok();
             }
