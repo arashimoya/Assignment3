@@ -11,7 +11,6 @@ namespace Assignment1.Data
 {
     public class CloudPersonService : IPersonService
     {
-        // private string uri = "http://localhost:5003";
         private readonly HttpClient client;
 
         public CloudPersonService()

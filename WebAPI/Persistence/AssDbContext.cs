@@ -11,7 +11,7 @@ namespace FileData
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite(@"DataSource = C:\Users\arasi\RiderProjects\DNPAssignments\Assigment3\WebAPI\Assignment.db");
+            optionsBuilder.UseSqlite(@"DataSource = C:\Users\Nacia\RiderProjects\Assignment3Main\WebAPI\Database.db");
         }
 
         

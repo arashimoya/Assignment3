@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using FileData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Models;
 using WebAPI.Models;
 
@@ -27,23 +28,16 @@ namespace WebAPI.Data
             }
         }
 
-        
-
         public async Task<IList<Adult>> GetAllAsync()
         {
-            List<Adult> tmp = new List<Adult>(adults);
-            return tmp;
+            return await assDbContext.Adults.ToListAsync();
         }
 
         public async Task<Adult> AddAdultAsync(Adult adult)
         {
-            int max = adults.Max(adult => adult.PersonId);
-            adult.PersonId = (++max);
-            adult.JobTitle.JobId = adult.PersonId;
-            adults.Add(adult);
-            assDbContext.Adults.Add(adult);
+            EntityEntry<Adult> newlyAdded = await assDbContext.Adults.AddAsync(adult);
             await assDbContext.SaveChangesAsync();
-            return adult;
+            return newlyAdded.Entity;
         }
 
         public async Task RemoveAdultAsync(int adultId)
@@ -55,27 +49,37 @@ namespace WebAPI.Data
                 assDbContext.Remove(toRemove);
                 await assDbContext.SaveChangesAsync();
             }
-            
         }
 
         public async Task<Adult> UpdateAsync(Adult adult)
         {
-            Adult toUpdate = adults.FirstOrDefault(a => a.PersonId == adult.PersonId);
-            if (toUpdate == null) throw new Exception($"Did not find an adult with this ID");
-            toUpdate.FirstName = adult.FirstName;
-            toUpdate.LastName = adult.LastName;
-            toUpdate.HairColor = adult.HairColor;
-            toUpdate.EyeColor = adult.EyeColor;
-            toUpdate.Age = adult.Age;
-            toUpdate.Weight = adult.Weight;
-            toUpdate.Height = adult.Height;
-            toUpdate.Sex = adult.Sex;
-            toUpdate.JobTitle.Salary = adult.JobTitle.Salary;
-            toUpdate.JobTitle.JobTitle = adult.JobTitle.JobTitle;
-            assDbContext.Adults.Update(toUpdate);
-            await assDbContext.SaveChangesAsync();
-            return toUpdate;
+            try
+            {
+                Adult toUpdate = adults.FirstOrDefault(a => a.PersonId == adult.PersonId);
+                if (toUpdate == null) 
+                    throw new Exception($"Did not find an adult with this ID");
+               
+                toUpdate.FirstName = adult.FirstName;
+                toUpdate.LastName = adult.LastName;
+                toUpdate.HairColor = adult.HairColor;
+                toUpdate.EyeColor = adult.EyeColor;
+                toUpdate.Age = adult.Age;
+                toUpdate.Weight = adult.Weight;
+                toUpdate.Height = adult.Height;
+                toUpdate.Sex = adult.Sex;
+                toUpdate.JobTitle.Salary = adult.JobTitle.Salary;
+                toUpdate.JobTitle.JobTitle = adult.JobTitle.JobTitle;
+                
+                assDbContext.Adults.Update(toUpdate);
+                await assDbContext.SaveChangesAsync();
+                return toUpdate;
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Did not find todo with id{adult.PersonId}");
+            }
         }
+
         private void Seed()
         {
             Adult[] adultArray =
@@ -100,24 +104,22 @@ namespace WebAPI.Data
                 new Adult
                 {
                     PersonId = 2,
-                    FirstName = "Tomek",
-                    LastName = "Maj",
-                    Age = 21,
-                    EyeColor = "Bronze",
-                    HairColor = "Black",
-                    Height = 175,
+                    FirstName = "Dan",
+                    LastName = "Pintea",
+                    Age = 23,
+                    EyeColor = "Hazel",
+                    HairColor = "Brown",
+                    Height = 180,
                     Sex = "M",
-                    Weight = 70,
+                    Weight = 66,
                     JobTitle = new Job()
                     {
-                        JobTitle = "IT support",
+                        JobTitle = "Junior Web Developer",
                         Salary = 20000,
                     },
                 },
-
             };
             adults = adultArray.ToList();
-
         }
 
         private void WriteAdultsToDb()
