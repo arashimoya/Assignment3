@@ -5,34 +5,84 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using FileData;
+using Microsoft.EntityFrameworkCore;
 using Models;
+using WebAPI.Models;
 
 namespace WebAPI.Data
 {
     public class PersonServiceImpl : IPersonService
     {
-        private FileContext FileContext;
-        private string adultsFile = "adults.json";
+        private AssDbContext assDbContext;
         private IList<Adult> adults;
 
         public PersonServiceImpl()
         {
-            if (!File.Exists(adultsFile))
+            assDbContext = new AssDbContext();
+            adults = assDbContext.Adults.ToList();
+            if (!adults.Any())
             {
                 Seed();
-                WriteAdultsToFile();
+                WriteAdultsToDb();
             }
-            string content = File.ReadAllText(adultsFile);
-            adults = JsonSerializer.Deserialize<IList<Adult>>(content);
         }
 
+        
+
+        public async Task<IList<Adult>> GetAllAsync()
+        {
+            List<Adult> tmp = new List<Adult>(adults);
+            return tmp;
+        }
+
+        public async Task<Adult> AddAdultAsync(Adult adult)
+        {
+            int max = adults.Max(adult => adult.PersonId);
+            adult.PersonId = (++max);
+            adult.JobTitle.JobId = adult.PersonId;
+            adults.Add(adult);
+            assDbContext.Adults.Add(adult);
+            await assDbContext.SaveChangesAsync();
+            return adult;
+        }
+
+        public async Task RemoveAdultAsync(int adultId)
+        {
+            Adult toRemove = adults.FirstOrDefault(a => a.PersonId == adultId);
+            adults.Remove(toRemove);
+            if (toRemove != null)
+            {
+                assDbContext.Remove(toRemove);
+                await assDbContext.SaveChangesAsync();
+            }
+            
+        }
+
+        public async Task<Adult> UpdateAsync(Adult adult)
+        {
+            Adult toUpdate = adults.FirstOrDefault(a => a.PersonId == adult.PersonId);
+            if (toUpdate == null) throw new Exception($"Did not find an adult with this ID");
+            toUpdate.FirstName = adult.FirstName;
+            toUpdate.LastName = adult.LastName;
+            toUpdate.HairColor = adult.HairColor;
+            toUpdate.EyeColor = adult.EyeColor;
+            toUpdate.Age = adult.Age;
+            toUpdate.Weight = adult.Weight;
+            toUpdate.Height = adult.Height;
+            toUpdate.Sex = adult.Sex;
+            toUpdate.JobTitle.Salary = adult.JobTitle.Salary;
+            toUpdate.JobTitle.JobTitle = adult.JobTitle.JobTitle;
+            assDbContext.Adults.Update(toUpdate);
+            await assDbContext.SaveChangesAsync();
+            return toUpdate;
+        }
         private void Seed()
         {
             Adult[] adultArray =
             {
                 new Adult
                 {
-                    Id = 1,
+                    PersonId = 1,
                     FirstName = "Adam",
                     LastName = "Ara",
                     Age = 20,
@@ -49,7 +99,7 @@ namespace WebAPI.Data
                 },
                 new Adult
                 {
-                    Id = 2,
+                    PersonId = 2,
                     FirstName = "Tomek",
                     LastName = "Maj",
                     Age = 21,
@@ -70,54 +120,14 @@ namespace WebAPI.Data
 
         }
 
-        private void WriteAdultsToFile()
+        private void WriteAdultsToDb()
         {
-            string productsAsJson = JsonSerializer.Serialize(adults, new JsonSerializerOptions
+            foreach (var adult in adults)
             {
-                WriteIndented = true
-            });
+                assDbContext.Adults.Add(adult);
+            }
 
-            File.WriteAllText(adultsFile, productsAsJson);
-        }
-
-        public async Task<IList<Adult>> GetAllAsync()
-        {
-            List<Adult> tmp = new List<Adult>(adults);
-            return tmp;
-        }
-
-        public async Task<Adult> AddAdultAsync(Adult adult)
-        {
-            int max = adults.Max(adult => adult.Id);
-            adult.Id = (++max);
-            adults.Add(adult);
-            WriteAdultsToFile();
-            return adult;
-        }
-
-        public async Task RemoveAdultAsync(int adultId)
-        {
-            Adult toRemove = adults.FirstOrDefault(a => a.Id == adultId);
-            adults.Remove(toRemove);
-            WriteAdultsToFile();
-        }
-
-        public async Task<Adult> UpdateAsync(Adult adult)
-        {
-            Adult toUpdate = adults.FirstOrDefault(a => a.Id == adult.Id);
-            if (toUpdate == null) throw new Exception($"Did not find an adult with this ID");
-            toUpdate.FirstName = adult.FirstName;
-            toUpdate.LastName = adult.LastName;
-            toUpdate.HairColor = adult.HairColor;
-            toUpdate.EyeColor = adult.EyeColor;
-            toUpdate.Age = adult.Age;
-            toUpdate.Weight = adult.Weight;
-            toUpdate.Height = adult.Height;
-            toUpdate.Sex = adult.Sex;
-            toUpdate.JobTitle.Salary = adult.JobTitle.Salary;
-            toUpdate.JobTitle.JobTitle = adult.JobTitle.JobTitle;
-            WriteAdultsToFile();
-            return toUpdate;
+            assDbContext.SaveChanges();
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using WebAPI.Data;
+using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
@@ -47,7 +48,8 @@ namespace WebAPI.Controllers
             try
             {
                 Adult added = await personService.AddAdultAsync(adult);
-                return Created($"/{added.Id}", added);
+                Console.WriteLine(added.ToString());
+                return Created($"/{added.PersonId}", added);
             }
             catch (Exception e)
             {

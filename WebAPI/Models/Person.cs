@@ -1,14 +1,16 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Models {
+namespace WebAPI.Models {
 public class Person {
    
-    [JsonPropertyName("Id")]
-    public int Id { get; set; }
+    [JsonPropertyName("Id"), Key]
+    public int PersonId { get; set; }
+    
     [Required, MaxLength(128)]
     [JsonPropertyName("FirstName")]
     public string FirstName { get; set; }
+    
     [Required, MaxLength(128)]
     [JsonPropertyName("LastName")]
     public string LastName { get; set; }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -32,7 +33,7 @@ namespace Assignment1.Data
                 "application/json");
 
             HttpResponseMessage responseMessage = await client.PostAsync("https://localhost:5003/adults", content);
-            if (!responseMessage.IsSuccessStatusCode)
+            if (responseMessage.StatusCode != HttpStatusCode.Created)
             {
                 throw new Exception($"Error, {responseMessage.StatusCode}, {responseMessage.ReasonPhrase}");
             }

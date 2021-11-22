@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace Models {
 public class Person {
     
-    [JsonPropertyName("Id")]
+    [JsonPropertyName("Id"), Key]
     public int Id { get; set; }
     [Required, MaxLength(128)]
     [JsonPropertyName("FirstName")]

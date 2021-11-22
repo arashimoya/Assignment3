@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FileData;
+using Microsoft.EntityFrameworkCore;
 using Models;
 
 namespace WebAPI.Data
@@ -11,40 +13,49 @@ namespace WebAPI.Data
     public class UserServiceImpl : IUserService
     {
         private IList<User> users;
-        private string usersFile = "users.json";
+        private AssDbContext assDbContext;
 
         public UserServiceImpl()
         {
-            if (!File.Exists(usersFile))
+            assDbContext = new AssDbContext();
+            users = assDbContext.Users.ToList();
+            if (!users.Any())
             {
                 Seed();
-                WriteUsersToFile();
+                WriteUsersToDb();
             }
-
-            string content = File.ReadAllText(usersFile);
-            users = JsonSerializer.Deserialize<IList<User>>(content);
         }
 
 
         public async Task<User> ValidateUser(string username, string password)
         {
-            User user = users.FirstOrDefault(u => u.Username.Equals(username) && u.Password.Equals(password));
-            if (user != null)
+            User userToValidate = assDbContext.Users.FirstOrDefault(u => u.Username.Equals(username) && u.Password.Equals(password));
+            if (userToValidate != null)
             {
-                return user;
+                return userToValidate;
             }
 
-            throw new Exception("User not found!");
+            throw new Exception("Wrong username or password");
         }
 
-        public Task RegisterUser(string username, string password)
+        public async Task RegisterUser(string username, string password)
         {
-            throw new NotImplementedException();
+            User userToRegister = new User();
+            userToRegister.Password = password;
+            userToRegister.Username = username;
+            assDbContext.Users.Add(userToRegister);
+            await assDbContext.SaveChangesAsync();
         }
 
-        public Task<bool> DoesUsernameAlreadyExist(string username)
+        public async Task<bool> DoesUsernameAlreadyExist(string username)
         {
-            throw new NotImplementedException();
+            User first = await assDbContext.Users.FirstOrDefaultAsync(u => u.Username.Equals(username));
+            if (first != null)
+            {
+                throw new Exception("User already exists!");
+            }
+
+            return false;
         }
 
         public async Task<IList<User>> GetAllAsync()
@@ -66,14 +77,14 @@ namespace WebAPI.Data
 
         }
 
-        private void WriteUsersToFile()
+        private void WriteUsersToDb()
         {
-            string productsAsJson = JsonSerializer.Serialize(users, new JsonSerializerOptions
+            foreach (var user in users)
             {
-                WriteIndented = true
-            });
+                assDbContext.Users.Add(user);
+            }
 
-            File.WriteAllText(usersFile, productsAsJson);
+            assDbContext.SaveChanges();
         }
     }
 }
