@@ -5,9 +5,10 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Assignment1.Data;
 using Models;
 
-namespace Assignment1.Data
+namespace WebAPI.Data
 {
     public class CloudPersonService : IPersonService
     {
@@ -44,7 +45,7 @@ namespace Assignment1.Data
             HttpContent content = new StringContent(todoAsJson,
                 Encoding.UTF8,
                 "application/json");
-            await client.PatchAsync($"https://localhost:5003/adults", content);
+            await client.PatchAsync($"https://localhost:5003/adults/{adult.Id}", content);
         }
 
         public async Task RemovePersonAsync(int adultId)
